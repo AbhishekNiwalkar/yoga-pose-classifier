@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Image Test Page</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .image-container {
+            margin: 20px 0;
+            padding: 10px;
+            border: 1px solid #ccc;
+        }
+        img {
+            max-width: 100%;
+            display: block;
+            margin: 10px 0;
+        }
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+        .success {
+            color: green;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>Static Image Test</h1>
+    
+    <div id="status"></div>
+    
+    <div id="imageContainers"></div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const statusDiv = document.getElementById('status');
+            const imageContainers = document.getElementById('imageContainers');
+            
+            // Test direct image access
+            fetch('/check_images')
+                .then(response => response.json())
+                .then(data => {
+                    statusDiv.innerHTML = `
+                        <p><strong>Base Directory:</strong> ${data.base_dir}</p>
+                        <p><strong>Images Directory:</strong> ${data.images_dir}</p>
+                        <p><strong>Static Folder:</strong> ${data.static_folder}</p>
+                        <p><strong>Static URL Path:</strong> ${data.static_url_path}</p>
+                        <p class="${data.available_images.length > 0 ? 'success' : 'error'}">
+                            <strong>Available Images:</strong> ${data.available_images.length}
+                        </p>
+                        <p class="${data.missing_images.length > 0 ? 'error' : 'success'}">
+                            <strong>Missing Images:</strong> ${data.missing_images.length}
+                        </p>
+                    `;
+                    
+                    // Create a container for each available image
+                    data.available_images.forEach(img => {
+                        const container = document.createElement('div');
+                        container.className = 'image-container';
+                        
+                        // Add image info
+                        container.innerHTML = `
+                            <h3>Image: ${img.name}</h3>
+                            <p>Path: ${img.path}</p>
+                            <p>URL: ${img.url}</p>
+                        `;
+                        
+                        // Try different ways to load the image
+                        const methods = [
+                            { name: "Direct URL", url: img.url },
+                            { name: "With timestamp", url: `${img.url}?t=${new Date().getTime()}` },
+                            { name: "Absolute path", url: `/static/images/${img.name}` },
+                            { name: "Relative path", url: `../static/images/${img.name}` }
+                        ];
+                        
+                        methods.forEach(method => {
+                            const imgElement = document.createElement('img');
+                            imgElement.alt = `${img.name} (${method.name})`;
+                            
+                            // Add load/error handlers
+                            imgElement.onload = function() {
+                                imgElement.style.border = '3px solid green';
+                                const successMsg = document.createElement('p');
+                                successMsg.className = 'success';
+                                successMsg.textContent = `✓ ${method.name}: Loaded successfully`;
+                                imgElement.parentNode.insertBefore(successMsg, imgElement);
+                            };
+                            
+                            imgElement.onerror = function() {
+                                imgElement.style.display = 'none';
+                                const errorMsg = document.createElement('p');
+                                errorMsg.className = 'error';
+                                errorMsg.textContent = `✗ ${method.name}: Failed to load`;
+                                container.appendChild(errorMsg);
+                            };
+                            
+                            // Set the source
+                            imgElement.src = method.url;
+                            
+                            // Add a heading for this method
+                            const methodHeading = document.createElement('h4');
+                            methodHeading.textContent = method.name;
+                            container.appendChild(methodHeading);
+                            container.appendChild(imgElement);
+                        });
+                        
+                        imageContainers.appendChild(container);
+                    });
+                })
+                .catch(error => {
+                    statusDiv.innerHTML = `<p class="error">Error: ${error.message}</p>`;
+                });
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yoga Profile Setup - Virtual Yoga Trainer</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('https://images.unsplash.com/photo-1545389336-cf090694435e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1920&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            border-radius: 20px;
+            width: 90%;
+            max-width: 600px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.2);
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .question {
+            margin-bottom: 30px;
+        }
+
+        .question label {
+            display: block;
+            color: white;
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .options {
+            display: grid;
+            gap: 15px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        .option {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 20px;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: white;
+            font-size: 1.1em;
+            text-align: center;
+            backdrop-filter: blur(5px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 80px;
+        }
+
+        .option:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .option input[type="radio"],
+        .option input[type="checkbox"] {
+            position: absolute;
+            opacity: 0;
+            cursor: pointer;
+            height: 0;
+            width: 0;
+        }
+
+        .option.selected {
+            background: rgba(0, 195, 255, 0.3);
+            border-color: rgba(0, 195, 255, 0.5);
+            box-shadow: 0 0 20px rgba(0, 195, 255, 0.3);
+        }
+
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.1);
+            color: white;
+            resize: vertical;
+            min-height: 100px;
+        }
+
+        textarea::placeholder {
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: rgba(0, 195, 255, 0.8);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+
+        .btn:hover {
+            background: rgba(0, 195, 255, 1);
+            transform: translateY(-2px);
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.1);
+            margin-bottom: 30px;
+            border-radius: 5px;
+            overflow: hidden;
+        }
+
+        .progress {
+            width: 0%;
+            height: 100%;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            transition: width 0.3s ease;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Welcome to Your Yoga Journey</h1>
+            <p>Help us personalize your experience</p>
+        </div>
+
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+
+        <form id="questionnaireForm">
+            <div class="question">
+                <label>What's your yoga experience level?</label>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="experience" value="beginner">
+                        Beginner
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="experience" value="intermediate">
+                        Intermediate
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="experience" value="advanced">
+                        Advanced
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>How would you describe your current fitness level?</label>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="fitness_level" value="low">
+                        Low
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="fitness_level" value="moderate">
+                        Moderate
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="fitness_level" value="high">
+                        High
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>What are your yoga goals? (Select all that apply)</label>
+                <div class="options">
+                    <label class="option">
+                        <input type="checkbox" name="goals[]" value="flexibility">
+                        Improve Flexibility
+                    </label>
+                    <label class="option">
+                        <input type="checkbox" name="goals[]" value="strength">
+                        Build Strength
+                    </label>
+                    <label class="option">
+                        <input type="checkbox" name="goals[]" value="stress">
+                        Reduce Stress
+                    </label>
+                    <label class="option">
+                        <input type="checkbox" name="goals[]" value="mindfulness">
+                        Mindfulness
+                    </label>
+                </div>
+            </div>
+
+            <div class="question">
+                <label>Do you have any health conditions we should know about?</label>
+                <textarea name="health_conditions" placeholder="Please share any relevant health conditions or injuries..."></textarea>
+            </div>
+
+            <div class="question">
+                <label>How much time can you dedicate to practice each day?</label>
+                <div class="options">
+                    <label class="option">
+                        <input type="radio" name="practice_time" value="15min">
+                        15 minutes
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="practice_time" value="30min">
+                        30 minutes
+                    </label>
+                    <label class="option">
+                        <input type="radio" name="practice_time" value="60min">
+                        60 minutes
+                    </label>
+                </div>
+            </div>
+
+            <button type="submit" class="btn">Start My Journey</button>
+        </form>
+    </div>
+
+    <script>
+        // Handle option selection styling
+        document.querySelectorAll('.option').forEach(option => {
+            option.addEventListener('click', function(e) {
+                const input = this.querySelector('input');
+                
+                if (input.type === 'radio') {
+                    // Remove selected class from other options in the same group
+                    document.querySelectorAll(`input[name="${input.name}"]`).forEach(radio => {
+                        radio.closest('.option').classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    input.checked = true;
+                } else if (input.type === 'checkbox') {
+                    this.classList.toggle('selected');
+                    input.checked = !input.checked;
+                }
+                
+                // Update progress bar
+                updateProgress();
+                
+                // Prevent default behavior
+                e.preventDefault();
+            });
+        });
+
+        // Handle form submission
+        document.getElementById('questionnaireForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            fetch('/submit_questionnaire', {
+                method: 'POST',
+                body: new FormData(this)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    if (data.has_health_risks) {
+                        // Show health recommendations modal
+                        showHealthRecommendations(data.recommendations);
+                    } else {
+                        // Redirect to home page
+                        window.location.href = data.redirect;
+                    }
+                } else {
+                    alert(data.error);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while submitting the questionnaire');
+            });
+        });
+
+        // Update progress bar as user fills out form
+        function updateProgress() {
+            const totalQuestions = document.querySelectorAll('.question').length;
+            let answeredQuestions = 0;
+            
+            // Count radio questions answered
+            document.querySelectorAll('.question').forEach(question => {
+                const radios = question.querySelectorAll('input[type="radio"]');
+                const checkboxes = question.querySelectorAll('input[type="checkbox"]');
+                const textarea = question.querySelector('textarea');
+                
+                if (radios.length) {
+                    if ([...radios].some(radio => radio.checked)) answeredQuestions++;
+                } else if (checkboxes.length) {
+                    if ([...checkboxes].some(checkbox => checkbox.checked)) answeredQuestions++;
+                } else if (textarea) {
+                    if (textarea.value.trim()) answeredQuestions++;
+                }
+            });
+            
+            const progress = (answeredQuestions / totalQuestions) * 100;
+            document.getElementById('progress').style.width = `${progress}%`;
+        }
+
+        // Add event listeners for progress tracking
+        document.querySelectorAll('input, textarea').forEach(input => {
+            input.addEventListener('change', updateProgress);
+        });
+
+        function showHealthRecommendations(recommendations) {
+            // Create modal HTML
+            const modalHTML = `
+                <div class="health-modal">
+                    <div class="health-modal-content">
+                        <h2>Important Health Recommendations</h2>
+                        <p>Based on your health conditions, please consider these recommendations:</p>
+                        <ul>
+                            ${recommendations.map(rec => `<li>${rec}</li>`).join('')}
+                        </ul>
+                        <p class="warning">Please consult with your healthcare provider before starting any new exercise routine.</p>
+                        <button onclick="acknowledgeAndContinue()" class="acknowledge-btn">I Understand</button>
+                    </div>
+                </div>
+            `;
+            
+            // Add modal styles
+            const modalStyles = `
+                <style>
+                    .health-modal {
+                        position: fixed;
+                        top: 0;
+                        left: 0;
+                        width: 100%;
+                        height: 100%;
+                        background: rgba(0, 0, 0, 0.5);
+                        display: flex;
+                        justify-content: center;
+                        align-items: center;
+                        z-index: 1000;
+                    }
+                    
+                    .health-modal-content {
+                        background: white;
+                        padding: 30px;
+                        border-radius: 15px;
+                        max-width: 600px;
+                        width: 90%;
+                        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+                    }
+                    
+                    .health-modal h2 {
+                        color: #ff5252;
+                        margin-bottom: 20px;
+                    }
+                    
+                    .health-modal ul {
+                        margin: 20px 0;
+                        padding-left: 20px;
+                    }
+                    
+                    .health-modal li {
+                        margin: 10px 0;
+                        color: #333;
+                    }
+                    
+                    .warning {
+                        color: #ff5252;
+                        font-weight: bold;
+                        margin: 20px 0;
+                    }
+                    
+                    .acknowledge-btn {
+                        background: #764ba2;
+                        color: white;
+                        padding: 12px 24px;
+                        border: none;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-size: 16px;
+                        transition: all 0.3s ease;
+                    }
+                    
+                    .acknowledge-btn:hover {
+                        background: #667eea;
+                        transform: translateY(-2px);
+                    }
+                </style>
+            `;
+            
+            // Add modal to page
+            document.body.insertAdjacentHTML('beforeend', modalStyles + modalHTML);
+        }
+
+        function acknowledgeAndContinue() {
+            // Remove modal
+            document.querySelector('.health-modal').remove();
+            // Redirect to home page
+            window.location.href = '{{ url_for("home") }}';
+        }
+    </script>
+</body>
+</html> 

@@ -1,0 +1,1086 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Yoga Pose Classifier</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Poppins', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.15);
+            width: 95%;
+            max-width: 1200px;
+            margin: 30px auto;
+            backdrop-filter: blur(10px);
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(118, 75, 162, 0.1);
+        }
+
+        h1 {
+            color: #764ba2;
+            margin-bottom: 25px;
+            font-size: 28px;
+            font-weight: 600;
+            text-align: center;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .section {
+            margin: 40px 0;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.8);
+            border-radius: 15px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .section-title {
+            color: #764ba2;
+            font-size: 24px;
+            font-weight: 600;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .upload-section {
+            border: 3px dashed rgba(118, 75, 162, 0.3);
+            border-radius: 15px;
+            padding: 40px;
+            margin: 30px 0;
+            transition: all 0.3s ease;
+            text-align: center;
+            background: rgba(255, 255, 255, 0.9);
+        }
+
+        .upload-section.dragover {
+            background: rgba(118, 75, 162, 0.05);
+            border-color: #764ba2;
+            transform: scale(1.02);
+        }
+
+        #imageInput {
+            display: none;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 30px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .btn-secondary {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+        }
+
+        #imagePreview {
+            max-width: 400px;
+            max-height: 400px;
+            margin: 20px auto;
+            border-radius: 8px;
+            display: none;
+        }
+
+        #result {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 20px 0;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .pose-name {
+            color: #764ba2;
+            font-size: 22px;
+            font-weight: 600;
+            margin-bottom: 10px;
+        }
+
+        .confidence {
+            color: #667eea;
+            font-size: 18px;
+            font-weight: 500;
+        }
+
+        .loading {
+            display: none;
+            margin: 20px auto;
+        }
+
+        .loading:after {
+            content: '';
+            display: block;
+            width: 30px;
+            height: 30px;
+            margin: 0 auto;
+            border-radius: 50%;
+            border: 3px solid #764ba2;
+            border-color: #764ba2 transparent #764ba2 transparent;
+            animation: loading 1.2s linear infinite;
+        }
+
+        .error {
+            background: rgba(255, 87, 87, 0.1);
+            border: 1px solid #ff5757;
+            color: #ff5757;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 10px 0;
+            display: none;
+        }
+
+        .camera-section {
+            margin: 20px 0;
+            display: none;
+        }
+
+        #videoElement {
+            width: 100%;
+            max-width: 640px;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .camera-btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 12px 28px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        }
+
+        .camera-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .split-view {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+            gap: 30px;
+            margin: 30px 0;
+        }
+
+        .reference-image {
+            max-width: 100%;
+            border-radius: 8px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+        }
+
+        .instructions {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 15px;
+            padding: 25px;
+            margin-top: 30px;
+        }
+
+        .instructions h3 {
+            color: #764ba2;
+            font-size: 20px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        .instructions ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .instructions li {
+            margin: 12px 0;
+            padding: 10px;
+            background: rgba(118, 75, 162, 0.05);
+            border-radius: 8px;
+            font-size: 16px;
+            color: #555;
+        }
+
+        .feedback-container {
+            margin-top: 20px;
+            padding: 20px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+        }
+
+        .feedback-score {
+            font-size: 24px;
+            font-weight: 600;
+            text-align: center;
+            margin: 10px 0;
+        }
+
+        .feedback-message {
+            text-align: center;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .logout-btn {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5253 100%);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            text-decoration: none;
+        }
+
+        .logout-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+            background: linear-gradient(135deg, #ff5252 0%, #dd4444 100%);
+        }
+
+        @keyframes loading {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .reference-poses-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 25px;
+            padding: 20px;
+        }
+
+        .reference-pose {
+            position: relative;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+            background: #fff;
+        }
+
+        .reference-pose:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 25px rgba(0,0,0,0.2);
+        }
+
+        .pose-image-container {
+            position: relative;
+            aspect-ratio: 3/4;
+            overflow: hidden;
+        }
+
+        .pose-image-container img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.3s ease;
+        }
+
+        .reference-pose:hover .pose-image-container img {
+            transform: scale(1.05);
+        }
+
+        .pose-overlay {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: linear-gradient(transparent, rgba(0,0,0,0.8));
+            padding: 20px;
+            color: white;
+            transform: translateY(0);
+            transition: all 0.3s ease;
+        }
+
+        .pose-info h3 {
+            margin: 0;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+
+        .pose-info p {
+            margin: 5px 0;
+            font-size: 0.9em;
+            opacity: 0.9;
+        }
+
+        .select-prompt {
+            display: inline-block;
+            margin-top: 10px;
+            padding: 5px 10px;
+            background: rgba(255,255,255,0.2);
+            border-radius: 15px;
+            font-size: 0.8em;
+        }
+
+        .prediction-section {
+            margin-top: 30px;
+        }
+
+        .prediction-content {
+            display: grid;
+            grid-template-columns: 1fr 2fr;
+            gap: 30px;
+            padding: 20px;
+        }
+
+        .selected-pose img {
+            width: 100%;
+            border-radius: 15px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .prediction-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .confidence-meter {
+            margin: 20px 0;
+            background: #f0f0f0;
+            border-radius: 10px;
+            height: 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .confidence-bar {
+            height: 100%;
+            background: linear-gradient(90deg, #4CAF50, #8BC34A);
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        .confidence-value {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            font-weight: 600;
+        }
+
+        .pose-instructions {
+            margin-top: 20px;
+        }
+
+        .pose-instructions ul {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .pose-instructions li {
+            margin: 10px 0;
+            padding: 10px;
+            background: #f8f9fa;
+            border-radius: 8px;
+            font-size: 0.9em;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 15px;
+                width: auto;
+            }
+
+            .split-view {
+                grid-template-columns: 1fr;
+            }
+
+            .prediction-content {
+                grid-template-columns: 1fr;
+            }
+
+            .reference-poses-grid {
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Yoga Pose Assistant</h1>
+            <a href="{{ url_for('logout') }}" class="btn btn-secondary">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Select a Reference Pose</h2>
+            <div id="referencePoses" class="reference-poses-grid">
+                <div class="reference-pose" onclick="selectPose('/static/images/00000073.jpg', 'अधोमुख श्वानासन (Adho Mukha Svanasana)')">
+                    <div class="pose-image-container">
+                        <img src="{{ url_for('static', filename='images/00000073.jpg') }}" alt="Downward-Facing Dog Pose">
+                        <div class="pose-overlay">
+                            <div class="pose-info">
+                                <h3>वृक्षासन</h3>
+                                <p>Vrikshasana</p>
+                                
+                                <span class="select-prompt">Click to analyze this pose</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reference-pose" onclick="selectPose('/static/images/00000096.jpg', 'उत्कट कोणासन (Utkata Konasana)')">
+                    <div class="pose-image-container">
+                        <img src="{{ url_for('static', filename='images/00000096.jpg') }}" alt="Goddess Pose">
+                        <div class="pose-overlay">
+                            <div class="pose-info">
+                                <h3>उत्कट कोणासन</h3>
+                                <p>Utkata Konasana</p>
+                                <span class="select-prompt">Click to analyze this pose</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reference-pose" onclick="selectPose('/static/images/00000129.jpg', 'फलकासन (Phalakasana)')">
+                    <div class="pose-image-container">
+                        <img src="{{ url_for('static', filename='images/00000129.jpg') }}" alt="Plank Pose">
+                        <div class="pose-overlay">
+                            <div class="pose-info">
+                                
+                                <h3>अधोमुख श्वानासन</h3>
+                                <p>Adho Mukha Svanasana</p>
+                                <span class="select-prompt">Click to analyze this pose</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reference-pose" onclick="selectPose('/static/images/00000132.jpg', 'वृक्षासन (Vrikshasana)')">
+                    <div class="pose-image-container">
+                        <img src="{{ url_for('static', filename='images/00000132.jpg') }}" alt="Tree Pose">
+                        <div class="pose-overlay">
+                            <div class="pose-info">
+                            <h3>वीरभद्रासन-2</h3>
+                            <p>Virabhadrasana II</p>
+                                <span class="select-prompt">Click to analyze this pose</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="reference-pose" onclick="selectPose('/static/images/00000137.jpg', 'वीरभद्रासन-2 (Virabhadrasana II)')">
+                    <div class="pose-image-container">
+                        <img src="{{ url_for('static', filename='images/00000137.jpg') }}" alt="Warrior II Pose">
+                        <div class="pose-overlay">
+                            <div class="pose-info">
+                                
+                                <h3>फलकासन</h3>
+                                <p>Phalakasana</p>
+                                <span class="select-prompt">Click to analyze this pose</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2 class="section-title">Upload Your Pose</h2>
+            <div class="upload-section" id="dropZone">
+                <form id="uploadForm" enctype="multipart/form-data">
+                    <input type="file" id="imageInput" accept="image/*" required>
+                    <button type="button" class="btn" onclick="document.getElementById('imageInput').click()">
+                        <i class="fas fa-cloud-upload-alt"></i> Choose Image
+                    </button>
+                    <p>or drag and drop an image here</p>
+                </form>
+            </div>
+            <img id="imagePreview" style="display: none; max-width: 100%; border-radius: 15px; margin: 20px auto;">
+            <div class="loading" id="loading"></div>
+            <div class="error" id="error"></div>
+            <div id="result" style="display: none;">
+                <div class="feedback-container">
+                    <h2 class="pose-name" id="poseName"></h2>
+                    <p class="confidence" id="confidence"></p>
+                </div>
+            </div>
+        </div>
+
+        <div class="section camera-section" id="cameraSection" style="display: none;">
+            <h2 class="section-title">Practice Mode</h2>
+            <div class="split-view">
+                <div class="reference-side">
+                    <h3>Reference Pose</h3>
+                    <img id="referenceImage" class="reference-image" style="width: 100%; border-radius: 12px;">
+                </div>
+                <div class="camera-side">
+                    <h3>Your Practice</h3>
+                    <video id="videoElement" autoplay playsinline style="width: 100%; border-radius: 12px;"></video>
+                    <div id="poseFeedback" class="feedback-container"></div>
+                    <div class="controls">
+                        <button id="startCamera" class="btn">
+                            <i class="fas fa-camera"></i> Start Camera
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="instructions" id="poseInstructions">
+                <h3>Instructions</h3>
+                <ul id="instructionsList"></ul>
+            </div>
+        </div>
+
+        <div class="section prediction-section" id="predictionSection" style="display: none;">
+            <h2 class="section-title">Pose Analysis</h2>
+            <div class="prediction-content">
+                <div class="selected-pose">
+                    <h3>Selected Pose</h3>
+                    <img id="selectedPoseImage" src="" alt="Selected Pose">
+                </div>
+                <div class="prediction-details">
+                    <div class="prediction-card">
+                        <h3 id="predictedPoseName"></h3>
+                        <div class="confidence-meter">
+                            <div id="confidenceBar" class="confidence-bar"></div>
+                            <span id="confidenceValue"></span>
+                        </div>
+                        <div id="poseInstructions" class="pose-instructions"></div>
+                        <div class="camera-controls" style="margin-top: 20px; text-align: center;">
+                            <button id="startPractice" class="btn">
+                                <i class="fas fa-camera"></i> Start Practice
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="section practice-section" id="practiceSection" style="display: none;">
+            <h2 class="section-title">Practice Mode</h2>
+            <div class="split-view">
+                <div class="reference-side">
+                    <h3>Reference Pose</h3>
+                    <img id="practiceReferenceImage" class="reference-image" style="width: 100%; border-radius: 12px;">
+                </div>
+                <div class="camera-side">
+                    <h3>Your Practice</h3>
+                    <video id="practiceVideoElement" autoplay playsinline style="width: 100%; border-radius: 12px;"></video>
+                    <div id="practiceFeedback" class="feedback-container"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM Elements
+            const dropZone = document.getElementById('dropZone');
+            const imageInput = document.getElementById('imageInput');
+            const imagePreview = document.getElementById('imagePreview');
+            const loading = document.getElementById('loading');
+            const result = document.getElementById('result');
+            const error = document.getElementById('error');
+            const poseName = document.getElementById('poseName');
+            const confidence = document.getElementById('confidence');
+            const cameraSection = document.getElementById('cameraSection');
+            const videoElement = document.getElementById('videoElement');
+            const startCamera = document.getElementById('startCamera');
+            const referenceImage = document.getElementById('referenceImage');
+            const instructionsList = document.getElementById('instructionsList');
+            const referencePoses = document.getElementById('referencePoses');
+            
+            // Tracking variables
+            let stream = null;
+            let mediaRecorder = null;
+            let recordedChunks = [];
+            let targetPose = '';
+            let isAnalyzing = false;
+            let analyzeInterval = null;
+            let practiceStream = null;
+            let practiceAnalyzeInterval = null;
+            let currentTargetPose = '';
+
+            // Drag and drop functionality
+            ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(eventName => {
+                if (dropZone) {
+                    dropZone.addEventListener(eventName, preventDefaults, false);
+                }
+            });
+
+            function preventDefaults(e) {
+                e.preventDefault();
+                e.stopPropagation();
+            }
+
+            ['dragenter', 'dragover'].forEach(eventName => {
+                if (dropZone) {
+                    dropZone.addEventListener(eventName, highlight, false);
+                }
+            });
+
+            ['dragleave', 'drop'].forEach(eventName => {
+                if (dropZone) {
+                    dropZone.addEventListener(eventName, unhighlight, false);
+                }
+            });
+
+            function highlight(e) {
+                dropZone.classList.add('dragover');
+            }
+
+            function unhighlight(e) {
+                dropZone.classList.remove('dragover');
+            }
+
+            if (dropZone) {
+                dropZone.addEventListener('drop', handleDrop, false);
+            }
+
+            function handleDrop(e) {
+                const dt = e.dataTransfer;
+                const files = dt.files;
+                handleFiles(files);
+            }
+
+            if (imageInput) {
+                imageInput.addEventListener('change', function(e) {
+                    handleFiles(this.files);
+                });
+            }
+
+            function handleFiles(files) {
+                const file = files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function(e) {
+                        imagePreview.src = e.target.result;
+                        imagePreview.style.display = 'block';
+                        submitImage(file);
+                    }
+                    reader.readAsDataURL(file);
+                }
+            }
+
+            // Yoga pose instructions
+            const poseInstructions = {
+                'अधोमुख श्वानासन (Adho Mukha Svanasana)': [
+                    'Start on your hands and knees',
+                    'Lift your knees off the floor',
+                    'Straighten your legs and arms',
+                    'Push your hips up towards the ceiling',
+                    'Keep your head between your arms',
+                    'Form an inverted V-shape with your body'
+                ],
+                'उत्कट कोणासन (Utkata Konasana)': [
+                    'Stand with feet wider than hip-width',
+                    'Turn toes outward',
+                    'Bend knees deeply',
+                    'Keep back straight',
+                    'Bring arms up to shoulder height',
+                    'Hold the pose while breathing steadily'
+                ],
+                'फलकासन (Phalakasana)': [
+                    'Start in a push-up position',
+                    'Keep your body in a straight line',
+                    'Engage your core muscles',
+                    'Keep arms straight and shoulders stable',
+                    'Look down at the floor',
+                    'Hold the position while breathing normally'
+                ],
+                'वृक्षासन (Vrikshasana)': [
+                    'Stand straight with feet together',
+                    'Shift weight to left foot',
+                    'Place right foot on left inner thigh',
+                    'Join palms above head',
+                    'Focus on a fixed point',
+                    'Keep breathing steady'
+                ],
+                'वीरभद्रासन-2 (Virabhadrasana II)': [
+                    'Stand with legs wide apart',
+                    'Turn right foot out 90 degrees',
+                    'Bend right knee',
+                    'Extend arms parallel to ground',
+                    'Look over right hand',
+                    'Keep torso centered'
+                ]
+            };
+
+            function submitImage(file) {
+                if (!file) return;
+                
+                const formData = new FormData();
+                formData.append('file', file);
+
+                if (loading) loading.style.display = 'block';
+                if (result) result.style.display = 'none';
+                if (error) error.style.display = 'none';
+                if (cameraSection) cameraSection.style.display = 'none';
+
+                fetch('/predict', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (loading) loading.style.display = 'none';
+                    if (data.error) {
+                        if (error) {
+                            error.textContent = `Error: ${data.error}`;
+                            error.style.display = 'block';
+                        }
+                    } else {
+                        if (poseName) poseName.textContent = data.class;
+                        if (confidence) confidence.textContent = `Confidence: ${data.confidence}`;
+                        if (result) result.style.display = 'block';
+                        
+                        // Show camera section and set reference image
+                        if (cameraSection) cameraSection.style.display = 'block';
+                        if (referenceImage) referenceImage.src = imagePreview.src;
+                        
+                        // Display pose instructions
+                        displayInstructions(data.class);
+                        
+                        // Store the target pose
+                        targetPose = data.class;
+                    }
+                })
+                .catch(err => {
+                    if (loading) loading.style.display = 'none';
+                    if (error) {
+                        error.textContent = `Error: ${err.message}`;
+                        error.style.display = 'block';
+                    }
+                });
+            }
+
+            function displayInstructions(poseName) {
+                if (!instructionsList) return;
+                
+                instructionsList.innerHTML = '';
+                const instructions = poseInstructions[poseName] || [];
+                instructions.forEach(instruction => {
+                    const li = document.createElement('li');
+                    li.textContent = instruction;
+                    instructionsList.appendChild(li);
+                });
+            }
+
+            // Initialize camera on button click
+            if (startCamera) {
+                startCamera.addEventListener('click', initializeCamera);
+            }
+
+            async function initializeCamera() {
+                try {
+                    stream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: 640,
+                            height: 480,
+                            facingMode: 'user'
+                        } 
+                    });
+                    
+                    if (videoElement) {
+                        videoElement.srcObject = stream;
+                        if (startCamera) startCamera.style.display = 'none';
+                    }
+                    
+                    // Start real-time analysis
+                    if (!analyzeInterval && targetPose) {
+                        analyzeInterval = setInterval(analyzePose, 1000);
+                    }
+                } catch (err) {
+                    console.error('Camera error:', err);
+                    alert('Error accessing camera: ' + err.message);
+                }
+            }
+
+            async function analyzePose() {
+                if (!stream || !targetPose || !videoElement) return;
+
+                try {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = videoElement.videoWidth;
+                    canvas.height = videoElement.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(videoElement, 0, 0);
+
+                    // Convert the canvas to blob
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+                    
+                    const formData = new FormData();
+                    formData.append('frame', blob);
+                    formData.append('target_pose', targetPose);
+
+                    const response = await fetch('/analyze_pose', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+
+                    // Update the feedback display
+                    const feedbackDiv = document.getElementById('poseFeedback');
+                    if (feedbackDiv) {
+                        feedbackDiv.innerHTML = `
+                            <p style="font-size: 1.2em; margin-bottom: 10px;">Current Pose: ${targetPose}</p>
+                            <p style="font-size: 1.4em; color: ${parseFloat(data.confidence) > 80 ? '#4CAF50' : 
+                                                            parseFloat(data.confidence) > 50 ? '#FFA500' : '#FF0000'}">
+                                Accuracy: ${data.confidence}%
+                            </p>
+                            <p style="font-size: 1.2em; color: ${data.is_matching ? '#4CAF50' : '#FF0000'}; margin-top: 10px;">
+                                ${parseFloat(data.confidence) > 80 ? 'Excellent!' : 
+                                parseFloat(data.confidence) > 50 ? 'Keep Improving!' : 'Keep Trying!'}
+                            </p>
+                        `;
+                    }
+                } catch (error) {
+                    console.error('Error analyzing pose:', error);
+                }
+            }
+
+            // Handle pose selection
+            window.selectPose = function(imageUrl, poseName) {
+                console.log("Selecting pose:", imageUrl, poseName);
+                
+                // Show prediction section
+                const predictionSection = document.getElementById('predictionSection');
+                const practiceSection = document.getElementById('practiceSection');
+                
+                if (predictionSection) predictionSection.style.display = 'block';
+                if (practiceSection) practiceSection.style.display = 'none';
+                
+                // Update selected pose image
+                const selectedPoseImage = document.getElementById('selectedPoseImage');
+                if (selectedPoseImage) selectedPoseImage.src = imageUrl;
+                
+                // Show loading state
+                const predictedPoseName = document.getElementById('predictedPoseName');
+                const confidenceBar = document.getElementById('confidenceBar');
+                const confidenceValue = document.getElementById('confidenceValue');
+                
+                if (predictedPoseName) predictedPoseName.textContent = 'Analyzing...';
+                if (confidenceBar) confidenceBar.style.width = '0%';
+                if (confidenceValue) confidenceValue.textContent = '';
+                
+                // Create form data with the image URL
+                const formData = new FormData();
+                formData.append('image_url', imageUrl);
+                
+                // Make prediction request
+                fetch('/predict_pose', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    console.log("Prediction response:", data);
+                    
+                    if (data.error) {
+                        throw new Error(data.error);
+                    }
+                    
+                    // Update prediction results
+                    if (predictedPoseName) predictedPoseName.textContent = data.pose_name;
+                    
+                    // Update confidence bar and value
+                    const confidencePercent = (data.confidence * 100).toFixed(1);
+                    if (confidenceBar) confidenceBar.style.width = confidencePercent + '%';
+                    if (confidenceValue) confidenceValue.textContent = confidencePercent + '%';
+                    
+                    // Display pose instructions if available
+                    const poseInstructionsDiv = document.getElementById('poseInstructions');
+                    if (poseInstructionsDiv && poseInstructions[data.pose_name]) {
+                        const instructionsHtml = poseInstructions[data.pose_name]
+                            .map(instruction => `<li>${instruction}</li>`)
+                            .join('');
+                        poseInstructionsDiv.innerHTML = `
+                            <h4>Instructions:</h4>
+                            <ul>${instructionsHtml}</ul>
+                        `;
+                    } else if (poseInstructionsDiv) {
+                        poseInstructionsDiv.innerHTML = '';
+                    }
+
+                    // Store the target pose for practice
+                    currentTargetPose = data.pose_name;
+                })
+                .catch(error => {
+                    console.error('Error during prediction:', error);
+                    
+                    if (predictedPoseName) predictedPoseName.textContent = 'Error analyzing pose';
+                    if (confidenceBar) confidenceBar.style.width = '0%';
+                    if (confidenceValue) confidenceValue.textContent = '';
+                    
+                    const poseInstructionsDiv = document.getElementById('poseInstructions');
+                    if (poseInstructionsDiv) poseInstructionsDiv.innerHTML = '';
+                });
+            };
+
+            // Set up practice mode button
+            const startPracticeBtn = document.getElementById('startPractice');
+            if (startPracticeBtn) {
+                console.log("Found start practice button");
+                startPracticeBtn.addEventListener('click', startPracticeMode);
+            }
+
+            async function startPracticeMode() {
+                console.log("Start practice clicked");
+                try {
+                    // Show practice section
+                    const practiceSection = document.getElementById('practiceSection');
+                    const predictionSection = document.getElementById('predictionSection');
+                    
+                    if (practiceSection) practiceSection.style.display = 'block';
+                    if (predictionSection) predictionSection.style.display = 'none';
+                    
+                    // Set reference image
+                    const practiceReferenceImage = document.getElementById('practiceReferenceImage');
+                    const selectedPoseImage = document.getElementById('selectedPoseImage');
+                    
+                    if (practiceReferenceImage && selectedPoseImage) {
+                        practiceReferenceImage.src = selectedPoseImage.src;
+                    }
+                    
+                    // Start camera
+                    practiceStream = await navigator.mediaDevices.getUserMedia({ 
+                        video: { 
+                            width: 640,
+                            height: 480,
+                            facingMode: 'user'
+                        } 
+                    });
+                    
+                    const practiceVideoElement = document.getElementById('practiceVideoElement');
+                    if (practiceVideoElement) {
+                        practiceVideoElement.srcObject = practiceStream;
+                    }
+                    
+                    // Start pose analysis
+                    if (!practiceAnalyzeInterval && currentTargetPose) {
+                        practiceAnalyzeInterval = setInterval(analyzePracticePose, 1000);
+                    }
+                } catch (err) {
+                    console.error('Camera error:', err);
+                    alert('Error accessing camera. Please make sure you have granted camera permissions: ' + err.message);
+                }
+            }
+
+            async function analyzePracticePose() {
+                const practiceVideoElement = document.getElementById('practiceVideoElement');
+                const practiceFeedback = document.getElementById('practiceFeedback');
+                
+                if (!practiceStream || !currentTargetPose || !practiceVideoElement || !practiceFeedback) {
+                    console.log("Missing requirements for practice analysis");
+                    return;
+                }
+
+                try {
+                    console.log("Analyzing practice pose:", currentTargetPose);
+                    const canvas = document.createElement('canvas');
+                    canvas.width = practiceVideoElement.videoWidth;
+                    canvas.height = practiceVideoElement.videoHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(practiceVideoElement, 0, 0);
+
+                    // Convert the canvas to blob
+                    const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/jpeg'));
+                    
+                    const formData = new FormData();
+                    formData.append('frame', blob);
+                    formData.append('target_pose', currentTargetPose);
+
+                    const response = await fetch('/analyze_pose', {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const data = await response.json();
+                    if (data.error) throw new Error(data.error);
+                    
+                    console.log("Practice analysis result:", data);
+
+                    // Update the feedback display
+                    practiceFeedback.innerHTML = `
+                        <p style="font-size: 1.2em; margin-bottom: 10px;">Current Pose: ${currentTargetPose}</p>
+                        <p style="font-size: 1.4em; color: ${parseFloat(data.confidence) > 80 ? '#4CAF50' : 
+                                                        parseFloat(data.confidence) > 50 ? '#FFA500' : '#FF0000'}">
+                            Accuracy: ${data.confidence}%
+                        </p>
+                        <p style="font-size: 1.2em; color: ${data.is_matching ? '#4CAF50' : '#FF0000'}; margin-top: 10px;">
+                            ${parseFloat(data.confidence) > 80 ? 'Excellent!' : 
+                            parseFloat(data.confidence) > 50 ? 'Keep Improving!' : 'Keep Trying!'}
+                        </p>
+                    `;
+                } catch (error) {
+                    console.error('Error analyzing practice pose:', error);
+                    practiceFeedback.innerHTML = `<p style="color: red;">Error analyzing your pose. Try again.</p>`;
+                }
+            }
+
+            // Cleanup function
+            window.addEventListener('beforeunload', function() {
+                console.log("Cleaning up resources");
+                if (analyzeInterval) {
+                    clearInterval(analyzeInterval);
+                }
+                if (stream) {
+                    stream.getTracks().forEach(track => track.stop());
+                }
+                if (practiceAnalyzeInterval) {
+                    clearInterval(practiceAnalyzeInterval);
+                }
+                if (practiceStream) {
+                    practiceStream.getTracks().forEach(track => track.stop());
+                }
+            });
+        });
+    </script>
+</body>
+</html> 
